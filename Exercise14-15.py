@@ -2,186 +2,186 @@ import sqlite3
 import tkinter as tk
 from tkinter import messagebox
 
-connection = sqlite3.connect('реестр_животных.db')
+connection = sqlite3.connect('animal.db')
 cursor = connection.cursor()
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS Животные (
+    CREATE TABLE IF NOT EXISTS animal (
         id INTEGER PRIMARY KEY,
-        название TEXT,
-        дата_рождения DATE,
-        команды TEXT,
-        тип TEXT
+        name TEXT,
+        birthdate DATE,
+        commands TEXT,
+        type TEXT
     )
 ''')
 connection.commit()
 
-class Животное:
-    def __init__(self, название, дата_рождения, команды):
-        self.название = название
-        self.дата_рождения = дата_рождения
-        self.команды = команды
+class animal:
+    def __init__(self, name, birthdate, commands):
+        self.name = name
+        self.birthdate = birthdate
+        self.commands = commands
 
-    def показать_команды(self):
-        print(f"Команды для животного {self.название}: {self.команды}")
-        print(f"Животное {self.название} успешно обучено новым командам!")
+    def show_commands(self):
+        print(f"commands for animal {self.name}: {self.commands}")
+        print(f"animal {self.name} successfully trained new commands!")
 
-class Домашнее_животное(Животное):
-    def __init__(self, название, дата_рождения, команды, тип):
-        super().__init__(название, дата_рождения, команды)
-        self.тип = тип
+class pet_animal(animal):
+    def __init__(self, name, birthdate, commands, type):
+        super().__init__(name, birthdate, commands)
+        self.type = type
 
-    def показать_особенности(self):
-        print(f"Особенности домашнего животного {self.название}: Тип - {self.тип}")
+    def show_особенности(self):
+        print(f"Pet Features {self.name}: type - {self.type}")
 
-class Вьючное_животное(Животное):
-    def __init__(self, название, дата_рождения, команды, тип):
-        super().__init__(название, дата_рождения, команды)
-        self.тип = тип
+class pack_animal(animal):
+    def __init__(self, name, birthdate, commands, type):
+        super().__init__(name, birthdate, commands)
+        self.type = type
 
-    def показать_особенности(self):
-        print(f"Особенности вьючного животного {self.название}: Тип - {self.тип}")
+    def show_особенности(self):
+        print(f"Features of the pack animal {self.name}: type - {self.type}")
 
 
-class Счетчик:
+class Counter:
     def __init__(self):
         self.count = 0
 
     def add(self):
         self.count += 1
-счетчик = Счетчик()
+Counter = Counter()
 
 
-def обучить_командам(название, новые_команды):
+def train_commands(name, new_commands):
     try:
-        cursor.execute('SELECT название, команды FROM Животные WHERE название=?', (название,))
-        животное = cursor.fetchone()
-        if not животное:
-            raise ValueError(f"Животное с именем '{название}' не найдено")
+        cursor.execute('SELECT name, commands FROM animal WHERE name=?', (name,))
+        animal = cursor.fetchone()
+        if not animal:
+            raise ValueError(f"animal  with the name '{name}' not found")
         
-        старые_команды = животное[1]
-        новые_команды = старые_команды + ', ' + новые_команды  # Добавляем новую команду к старым командам
+        old_commands = animal[1]
+        new_commands = old_commands + ', ' + new_commands  # Adding a new command to old commands
         
-        cursor.execute('UPDATE Животные SET команды=? WHERE название=?', (новые_команды, название))
+        cursor.execute('UPDATE animal SET commands=? WHERE name=?', (new_commands, name))
         connection.commit()
         
-        messagebox.showinfo("Успех", f"Животное {название} успешно обучено новой команде!")
+        messagebox.showinfo("Success", f"animal {name}  has been successfully trained with the new command!")
     except Exception as e:
-        messagebox.showerror("Ошибка", f"Ошибка при обучении команде: {e}")
+        messagebox.showerror("Error", f"Error  during command training: {e}")
 
 
-def создать_животное(тип):
+def create_animal(type):
     try:
-        название = entry_название_домашнее.get() if тип == 'домашнее' else entry_название_вьючное.get()
-        дата_рождения = entry_дата_рождения_домашнее.get() if тип == 'домашнее' else entry_дата_рождения_вьючное.get()
-        команды = entry_команды_домашнее.get() if тип == 'домашнее' else entry_команды_вьючное.get()
+        name = entry_name_pet.get() if type == 'pet' else entry_name_pack.get()
+        birthdate = entry_birthdate_pet.get() if type == 'pet' else entry_birthdate_pack.get()
+        commands = entry_commands_pet.get() if type == 'pet' else entry_commands_pack.get()
         
-        if название and дата_рождения and команды:
-            счетчик.add()
-            тип_животного = entry_тип_домашнее.get() if тип == 'домашнее' else entry_тип_вьючное.get()
+        if name and birthdate and commands:
+            Counter.add()
+            type_animal = entry_type_pet.get() if type == 'pet' else entry_type_pack.get()
 
             cursor.execute('''
-                INSERT INTO Животные (название, дата_рождения, команды, тип)
+                INSERT INTO animal (name, birthdate, commands, type)
                 VALUES (?, ?, ?, ?)
-            ''', (название, дата_рождения, команды, тип_животного))
+            ''', (name, birthdate, commands, type_animal))
             connection.commit()
-            messagebox.showinfo("Успех", f"Животное {название} успешно добавлено в базу данных!")
+            messagebox.showinfo("Success", f"animal {name} has been successfully added to the database!")
             
-            # Создание объекта животного на основе типа
-            if тип == 'домашнее':
-                return Домашнее_животное(название, дата_рождения, команды, тип_животного)
-            elif тип == 'вьючное':
-                return Вьючное_животное(название, дата_рождения, команды, тип_животного)
+            # Creating an animal object based on typ
+            if type == 'pet':
+                return pet_animal(name, birthdate, commands, type_animal)
+            elif type == 'pack':
+                return pack_animal(name, birthdate, commands, type_animal)
         else:
-            raise ValueError("Не заполнены обязательные поля")
+            raise ValueError("Required fields are not filled in")
     except Exception as e:
-        messagebox.showerror("Ошибка", f"Ошибка при создании животного: {e}")
+        messagebox.showerror("Error", f"Error when creating an animal: {e}")
 
 
-def показать_всех_животных():
-    cursor.execute('SELECT * FROM Животные')
-    животные = cursor.fetchall()
-    if животные:
-        текст = "Список всех заведенных животных:\n"
-        for животное in животные:
-            команды = животное[3].split(', ')
-            текст += f"Название: {животное[1]}, Команды: {', '.join(команды)}  Дата рождения:{животное[2]}, Тип:{животное[4]}\n"
-        messagebox.showinfo("Животные", текст)
+def show_all_animal():
+    cursor.execute('SELECT * FROM animal')
+    animal = cursor.fetchall()
+    if animal:
+        text = "A list of all the animals:\n"
+        for animal in animal:
+            commands = animal[3].split(', ')
+            text += f"name: {animal[1]}, commands: {', '.join(commands)}  birthdate:{animal[2]}, type:{animal[4]}\n"
+        messagebox.showinfo("animal", text)
     else:
-        messagebox.showinfo("Животные", "Нет заведенных животных")
+        messagebox.showinfo("animal", "No animals in database")
 
 
 root = tk.Tk()
-root.title("Реестр домашних животных")
+root.title("Pet registry")
 
-# Фреймы для домашнего и вьючного животного
-frame_домашнее = tk.Frame(root)
-frame_домашнее.grid(row=0, column=0)
+# Pet and pack animal frames
+frame_pet = tk.Frame(root)
+frame_pet.grid(row=0, column=0)
 
-frame_вьючное = tk.Frame(root)
-frame_вьючное.grid(row=1, column=0)
+frame_pack = tk.Frame(root)
+frame_pack.grid(row=1, column=0)
 
-# Метки и Поля ввода для Домашнего животного
-label_название_домашнее = tk.Label(frame_домашнее, text="Название:")
-label_название_домашнее.grid(row=0, column=0)
-entry_название_домашнее = tk.Entry(frame_домашнее)
-entry_название_домашнее.grid(row=0, column=1)
+# Labels and Input Fields for Pets
+label_name_pet = tk.Label(frame_pet, text="name:")
+label_name_pet.grid(row=0, column=0)
+entry_name_pet = tk.Entry(frame_pet)
+entry_name_pet.grid(row=0, column=1)
 
-label_дата_рождения_домашнее = tk.Label(frame_домашнее, text="Дата рождения:")
-label_дата_рождения_домашнее.grid(row=1, column=0)
-entry_дата_рождения_домашнее = tk.Entry(frame_домашнее)
-entry_дата_рождения_домашнее.grid(row=1, column=1)
+label_birthdate_pet = tk.Label(frame_pet, text=" birthdate:")
+label_birthdate_pet.grid(row=1, column=0)
+entry_birthdate_pet = tk.Entry(frame_pet)
+entry_birthdate_pet.grid(row=1, column=1)
 
-label_команды_домашнее = tk.Label(frame_домашнее, text="Команды:")
-label_команды_домашнее.grid(row=2, column=0)
-entry_команды_домашнее = tk.Entry(frame_домашнее)
-entry_команды_домашнее.grid(row=2, column=1)
+label_commands_pet = tk.Label(frame_pet, text="commands:")
+label_commands_pet.grid(row=2, column=0)
+entry_commands_pet = tk.Entry(frame_pet)
+entry_commands_pet.grid(row=2, column=1)
 
-label_тип_домашнее = tk.Label(frame_домашнее, text="Тип:")
-label_тип_домашнее.grid(row=3, column=0)
-entry_тип_домашнее = tk.Entry(frame_домашнее)
-entry_тип_домашнее.grid(row=3, column=1)
+label_type_pet = tk.Label(frame_pet, text="type:")
+label_type_pet.grid(row=3, column=0)
+entry_type_pet = tk.Entry(frame_pet)
+entry_type_pet.grid(row=3, column=1)
 
-button_домашнее = tk.Button(frame_домашнее, text="Завести домашнее животное", command=lambda: создать_животное('домашнее'))
-button_домашнее.grid(row=4, columnspan=2)
+button_pet = tk.Button(frame_pet, text="Завести pet animal", command=lambda: create_animal('pet'))
+button_pet.grid(row=4, columnspan=2)
 
 # Метки и Поля ввода для Вьючного животного
-label_название_вьючное = tk.Label(frame_вьючное, text="Название:")
-label_название_вьючное.grid(row=0, column=0)
-entry_название_вьючное = tk.Entry(frame_вьючное)
-entry_название_вьючное.grid(row=0, column=1)
+label_name_pack = tk.Label(frame_pack, text="name:")
+label_name_pack.grid(row=0, column=0)
+entry_name_pack = tk.Entry(frame_pack)
+entry_name_pack.grid(row=0, column=1)
 
-label_новые_команды = tk.Label(frame_вьючное, text="Новые команды:")
-label_новые_команды.grid(row=7, column=0)
-entry_новые_команды = tk.Entry(frame_вьючное)
-entry_новые_команды.grid(row=7, column=1)
+label_new_commands = tk.Label(frame_pack, text="New commands:")
+label_new_commands.grid(row=7, column=0)
+entry_new_commands = tk.Entry(frame_pack)
+entry_new_commands.grid(row=7, column=1)
 
-label_выбор_животного = tk.Label(frame_вьючное, text="Выберите животное для обучения:")
-label_выбор_животного.grid(row=6, column=0)
-entry_выбор_животного = tk.Entry(frame_вьючное)
-entry_выбор_животного.grid(row=6, column=1)
+label_select_animal = tk.Label(frame_pack, text="Select an animal for training:")
+label_select_animal.grid(row=6, column=0)
+entry_select_animal = tk.Entry(frame_pack)
+entry_select_animal.grid(row=6, column=1)
 
-label_дата_рождения_вьючное = tk.Label(frame_вьючное, text="Дата рождения:")
-label_дата_рождения_вьючное.grid(row=1, column=0)
-entry_дата_рождения_вьючное = tk.Entry(frame_вьючное)
-entry_дата_рождения_вьючное.grid(row=1, column=1)
+label_birthdate_pack = tk.Label(frame_pack, text=" birthdate:")
+label_birthdate_pack.grid(row=1, column=0)
+entry_birthdate_pack = tk.Entry(frame_pack)
+entry_birthdate_pack.grid(row=1, column=1)
 
-label_команды_вьючное = tk.Label(frame_вьючное, text="Команды:")
-label_команды_вьючное.grid(row=2, column=0)
-entry_команды_вьючное = tk.Entry(frame_вьючное)
-entry_команды_вьючное.grid(row=2, column=1)
+label_commands_pack = tk.Label(frame_pack, text="commands:")
+label_commands_pack.grid(row=2, column=0)
+entry_commands_pack = tk.Entry(frame_pack)
+entry_commands_pack.grid(row=2, column=1)
 
-label_тип_вьючное = tk.Label(frame_вьючное, text="Тип:")
-label_тип_вьючное.grid(row=3, column=0)
-entry_тип_вьючное = tk.Entry(frame_вьючное)
-entry_тип_вьючное.grid(row=3, column=1)
+label_type_pack = tk.Label(frame_pack, text="type:")
+label_type_pack.grid(row=3, column=0)
+entry_type_pack = tk.Entry(frame_pack)
+entry_type_pack.grid(row=3, column=1)
 
-button_вьючное = tk.Button(frame_вьючное, text="Завести вьючное животное", command=lambda: создать_животное('вьючное'))
-button_вьючное.grid(row=4, columnspan=2)
+button_pack = tk.Button(frame_pack, text="Get a pack animal", command=lambda: create_animal('pack'))
+button_pack.grid(row=4, columnspan=2)
 
-button_вьючное = tk.Button(frame_вьючное, text="Показать всех животных ", command=lambda: показать_всех_животных())
-button_вьючное.grid(row=16, columnspan=4)
-button_вьючное_обучение = tk.Button(frame_вьючное, text="Обучить новым командам ", command=lambda: обучить_командам(entry_выбор_животного.get(), entry_новые_команды.get()))
-button_вьючное_обучение.grid(row=8, columnspan=6)
+button_pack = tk.Button(frame_pack, text="show all animals ", command=lambda: show_all_animal())
+button_pack.grid(row=16, columnspan=4)
+button_pack_обучение = tk.Button(frame_pack, text="Teach new commands ", command=lambda:train_commands(entry_select_animal.get(), entry_new_commands.get()))
+button_pack_обучение.grid(row=8, columnspan=6)
 
 
 
