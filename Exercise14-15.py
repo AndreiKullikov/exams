@@ -30,7 +30,7 @@ class pet_animal(animal):
         super().__init__(name, birthdate, commands)
         self.type = type
 
-    def show_особенности(self):
+    def show_features(self):
         print(f"Pet Features {self.name}: type - {self.type}")
 
 class pack_animal(animal):
@@ -38,7 +38,7 @@ class pack_animal(animal):
         super().__init__(name, birthdate, commands)
         self.type = type
 
-    def show_особенности(self):
+    def show_features(self):
         print(f"Features of the pack animal {self.name}: type - {self.type}")
 
 
